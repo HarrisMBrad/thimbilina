@@ -1,25 +1,25 @@
-// Reinforcement Learning Experiment for Multiple Days with Debug Logs
+// Reinforcement Learning Experiment for Multiple Days with Daily UI Rendering
 
 class Agent {
     constructor() {
         this.reward = 0;
         this.state = "initial";
-        console.log("Agent initialized with state: initial");
+        logOutput("Agent initialized with state: initial");
     }
 
     action(environment) {
-        console.log("Agent performs an action");
+        logOutput("Agent performs an action");
         return "Next";  // Placeholder for next action/state
     }
 
     feedback(A, RW, nextState, knownRewards) {
-        console.log(`Agent received feedback: Action(${A}), Reward(${RW}), NextState(${nextState})`);
-        console.log(`Known rewards for validation: ${knownRewards}`);
+        logOutput(`Agent received feedback: Action(${A}), Reward(${RW}), NextState(${nextState})`);
+        logOutput(`Known rewards for validation: ${knownRewards}`);
         if (knownRewards.includes(RW)) {
             this.state = nextState;
-            console.log(`State updated to: ${this.state}`);
+            logOutput(`State updated to: ${this.state}`);
         } else {
-            console.log("State not updated due to mismatched reward");
+            logOutput("State not updated due to mismatched reward");
         }
     }
 }
@@ -27,20 +27,27 @@ class Agent {
 class Environment {
     constructor() {
         this.state = "initial";
-        console.log("Environment initialized with state: initial");
+        logOutput("Environment initialized with state: initial");
     }
 
     interact(action) {
-        console.log(`Environment reacts to action: ${action}`);
+        logOutput(`Environment reacts to action: ${action}`);
         let reward = Math.floor(Math.random() * 10);
-        console.log(`Generated reward: ${reward}`);
+        logOutput(`Generated reward: ${reward}`);
         return { reward: reward, nextState: "Next" };
     }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    let today = new Date().toLocaleString('en-us', { weekday: 'long' });
+    document.getElementById("runSimulation").addEventListener("click", () => reinforcementLearning(today));
+    document.getElementById("currentDay").textContent = `Simulation for ${today}`;
+});
+
 function reinforcementLearning(day) {
-    console.log("====================================");
-    console.log(`Starting simulation for ${day}`);
+    clearOutput();
+    logOutput("====================================");
+    logOutput(`Starting simulation for ${day}`);
     let agent = new Agent();
     let environment = new Environment();
     let knownRewardsMap = {
@@ -54,16 +61,23 @@ function reinforcementLearning(day) {
     };
     
     let knownRewards = knownRewardsMap[day] || [];
-    console.log(`Known rewards for ${day}: ${knownRewards}`);
+    logOutput(`Known rewards for ${day}: ${knownRewards}`);
     
     let A = agent.action(environment);
     let result = environment.interact(A);
     agent.feedback(A, result.reward, result.nextState, knownRewards);
-    console.log(`Simulation for ${day} completed.`);
-    console.log("====================================\n");
+    logOutput(`Simulation for ${day} completed.`);
+    logOutput("====================================\n");
 }
 
-// Simulate for the next 7 days starting from Friday
-const daysOfWeek = ["Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
-daysOfWeek.forEach(day => reinforcementLearning(day));
+function logOutput(message) {
+    const outputElement = document.getElementById("output");
+    outputElement.textContent += message + "\n";
+    outputElement.scrollTop = outputElement.scrollHeight; // Auto-scroll to latest log
+}
+
+function clearOutput() {
+    document.getElementById("output").textContent = "";
+}
+
 
